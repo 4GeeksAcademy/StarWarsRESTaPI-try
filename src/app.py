@@ -8,7 +8,8 @@ from flask_swagger import swagger
 from flask_cors import CORS
 from utils import APIException, generate_sitemap
 from admin import setup_admin
-from models import db, User
+from models import db, User, Character, Planet, Favorites
+import json
 #from models import Person
 
 app = Flask(__name__)
@@ -44,6 +45,47 @@ def handle_hello():
     }
 
     return jsonify(response_body), 200
+
+
+@app.route('/character', methods = ['GET'])
+def get_character():
+    character_info = Character.query.all()
+    if character_info == []:
+        return jsonify({"msg": "The character doesn't exist"}), 404
+    result = list(map(lambda character: character.serialize(), character_info))
+    return jsonify(result), 200
+
+@app.route('/character/<int:id_character>')
+def get_id_character(id_character):
+    character_id = Character.query.filter_by(id = id_character).first()
+    if character_id is None:
+        return jsonify({"msg": "The character doesn't exist"}), 404
+    return jsonify(character_id.serialize()), 200
+
+
+@app.route('/planet', methods=['GET'])
+def get_planet():
+    planet_info = Planet.query.all() #acceder a la tabla planet y traer toda la info
+    if planet_info == []:
+        return jsonify({"msg": "The planet doesn't exist"}), 404
+    result = list(map(lambda planet: planet.serialize(), planet_info))
+    return jsonify(result), 200
+
+
+@app.route('/planet/<int:id_planet>', methods=['GET'])
+def get_id_planet(id_planet):
+    planet_id = Planet.query.filter_by(id = id_planet).first()
+    if planet_id is None:
+        return jsonify({"msg": "The planet doesn't exist"}), 404 # cuando está vacio me transforma en un objeto
+    return jsonify(planet_id.serialize()), 200
+    
+    
+
+
+    
+
+
+
 
 # this only runs if `$ python src/app.py` is executed
 if __name__ == '__main__':
